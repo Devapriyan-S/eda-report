@@ -428,3 +428,33 @@ svg.heat { background: var(--surface); border: 1px solid var(--border);
 .col-card.role-empty       { border-left-color: var(--text-mute); opacity: .68; }
 
 h4.sub { margin-top: 1.4rem; }
+
+/* ── Auto-loaded demo ─────────────────────────────────────── */
+/* The dropzone collapses to a single strip once data is loaded: a visitor
+   arriving at a working demo should see results, not a large empty box. */
+.dropzone.compact {
+  display: grid; grid-template-columns: auto 1fr; gap: .1rem 1rem;
+  align-items: center; text-align: left; padding: .8rem 1.15rem;
+}
+.dropzone.compact .dz-icon { grid-row: 1 / 3; font-size: 1.4rem; }
+.dropzone.compact .dz-title { margin: 0; font-size: .85rem; }
+.dropzone.compact .dz-sub { margin: 0; font-size: .74rem; }
+
+.demo-banner {
+  display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+  background: linear-gradient(135deg, rgba(57,214,208,.10), rgba(167,139,250,.07));
+  border: 1px solid var(--border-lit); border-radius: var(--radius);
+  padding: .65rem 1rem; margin-bottom: 1.1rem; font-size: .83rem;
+  color: var(--text-dim);
+}
+.demo-banner strong { color: var(--text); font-weight: 600; }
+.demo-banner .pill { flex: none; }
+.demo-banner button {
+  font: inherit; font-size: .78rem; font-weight: 600; cursor: pointer;
+  background: none; border: none; color: var(--primary); padding: 0;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.demo-banner button:hover { color: var(--text); }
+
+.boot-note .demo-hint { color: var(--primary); }
+.demo-banner .spacer { flex: 1; min-width: 0; }

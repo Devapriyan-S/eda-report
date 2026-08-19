@@ -52,7 +52,11 @@ worker.onmessage = ({ data }) => {
   } else if (data.type === "ready") {
     $("#boot-bar").style.width = "100%";
     $("#runtime-badge").textContent = data.versions;
-    setTimeout(() => { $("#boot").hidden = true; $("#app").hidden = false; }, 300);
+    setTimeout(() => {
+      $("#boot").hidden = true;
+      $("#app").hidden = false;
+      bootstrapDemo();
+    }, 300);
   } else if (data.type === "bootError") {
     $("#boot-stage").textContent = "Could not start Python";
     $("#boot-error").hidden = false;
@@ -65,6 +69,69 @@ worker.onmessage = ({ data }) => {
     (data.isError ? console.warn : console.log)("[python]", data.line);
   }
 };
+
+
+/* Position the page on the result once the demo has rendered.
+ *
+ * Three of these tools put a substantial profiling step between the upload box
+ * and the payoff, which is right for someone working through them and wrong
+ * for a visitor who has not clicked anything yet. The jump is instant rather
+ * than smooth so it reads as the page having opened there, not as the page
+ * moving underneath you. Everything skipped is one scroll up.
+ */
+function landOnResults(selector) {
+  requestAnimationFrame(() => {
+    const n = document.querySelector(selector);
+    if (!n) return;
+    const y = n.getBoundingClientRect().top + window.scrollY - 74;
+    window.scrollTo({ top: Math.max(0, y), behavior: "instant" });
+  });
+}
+
+/* ── Automatic demo on arrival ────────────────────────────── */
+
+/* Suppresses the smooth-scroll that suits a click and not a page setting
+   itself up before anyone has touched it. */
+let booting = false;
+
+async function bootstrapDemo() {
+  booting = true;
+  try {
+    await analyse(SAMPLES.messy, "messy-orders.csv");
+
+    const host = document.querySelector(".step");
+    host.querySelector(".demo-banner")?.remove();
+    const banner = el("div", "demo-banner");
+    banner.append(el("span", "badge badge-privacy", "Live demo"));
+    const text = el("span");
+    text.innerHTML =
+      "Profiling <strong>1,485 rows of deliberately messy order data</strong> — " +
+      "duplicates, a failed join, a skewed column and a constant. Every problem " +
+      "below was found, not scripted.";
+    banner.append(text, el("span", "spacer"));
+    const btn = el("button", null, "Profile your own CSV →");
+    btn.type = "button";
+    btn.addEventListener("click", () => {
+      dz.hidden = false;
+      dz.classList.add("compact");
+      dz.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    banner.append(btn);
+    host.insertBefore(banner, host.querySelector(".dropzone"));
+
+    dz.hidden = true;
+
+    dz.classList.add("compact");
+    dz.querySelector(".dz-title").textContent = "Drop your own CSV to replace the sample";
+    dz.querySelector(".dz-sub").textContent =
+      "Everything is computed locally — the file never leaves your machine";
+    landOnResults("#report");
+  } catch (err) {
+    console.error("demo bootstrap failed", err);
+  } finally {
+    booting = false;
+  }
+}
 
 /* ── Load ─────────────────────────────────────────────────── */
 
@@ -102,7 +169,7 @@ async function analyse(text, name) {
   lastReport = res;
   render(res);
   $("#report").hidden = false;
-  $("#report").scrollIntoView({ behavior: "smooth", block: "start" });
+  if (!booting) $("#report").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 /* ── Render ───────────────────────────────────────────────── */
