@@ -1,0 +1,9 @@
+{
+  "package": "edakit",
+  "files": [
+    "__init__.py",
+    "associations.py",
+    "findings.py",
+    "profile.py"
+  ]
+}

@@ -1,0 +1,24 @@
+name: tests
+on:
+  push: { branches: [main] }
+  pull_request:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: { python-version: ["3.10", "3.12"] }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ matrix.python-version }}", cache: pip }
+      - run: pip install -r requirements.txt
+      - name: Association measures and findings
+        run: python tests/test_eda.py
+      - name: Verify web/py is in sync with edakit
+        run: |
+          python build.py
+          if ! git diff --quiet -- web/py; then
+            echo "::error::web/py is stale. Run 'python build.py' and commit."
+            exit 1
+          fi
